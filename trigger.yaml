@@ -1,0 +1,138 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: tekton-chatops-trigger-template
+spec:
+  params:
+    - name: repourl
+      description: The git repository url
+    - name: prurl
+      description: The url to the PR
+    - name: comment
+      description: The text of the comment
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1alpha1
+      kind: TaskRun
+      metadata:
+        generateName: tekton-chatops-run-
+      spec:
+        taskRef:
+          name: tekton-chatops-task
+        inputs:
+          resources:
+            - name: repo
+              resourceSpec:
+                type: git
+                params:
+                  - name: url
+                    value: $(params.repourl)
+            - name: pr
+              resourceSpec:
+                type: pullRequest
+                params:
+                  - name: url
+                    value: $(params.prurl)
+          params:
+            - name: comment
+              value: $(params.comment)
+        outputs:
+          resources:
+            - name: pr
+              resourceSpec:
+                type: pullRequest
+                params:
+                  - name: url
+                    value: $(params.prurl)
+                secrets:
+                  - secretName: github-token
+                    secretKey: token
+                    fieldName: authToken
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: tekton-chatops-trigger-binding
+spec:
+  params:
+    - name: prurl
+      value: $(body.issue.html_url)
+    - name: repourl
+      value: $(body.repository.html_url)
+    - name: comment
+      value: $(body.comment.body)
+---
+apiVersion: tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: tekton-chatops-event-listener
+spec:
+  serviceAccountName: tekton-chatops-sa
+  triggers:
+    - binding:
+        name: tekton-chatops-trigger-binding
+      template:
+        name: tekton-chatops-trigger-template
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: tekton-chatops-route
+spec:
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  wildcardPolicy: None
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: el-tekton-chatops-event-listener
+    weight: 100
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tekton-chatops-role
+rules:
+  - apiGroups:
+      - tekton.dev
+    resources:
+      - eventlisteners
+      - triggerbindings
+      - triggertemplates
+      - pipelineresources
+    verbs:
+      - get
+  - apiGroups:
+      - tekton.dev
+    resources:
+      - pipelineruns
+      - pipelineresources
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tekton-chatops-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tekton-chatops-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: tekton-chatops-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tekton-chatops-role
