@@ -46,5 +46,5 @@ spec:
         --git-provider-url https://github.com/ \
         --organisation $(inputs.params.prorg) \
         --repository-name $(inputs.params.reponame) \
-        --text='Helloooohoooo\r\nWorld' \
+        --text='Welcome to Baloise ChatOps based GitOps Bot.<br><br>If you want to enable preview environments for this PullRequest, comment with `/preview`.<br>If you want to disable the preview environment for this PR, comment with `/undeploy`.<br>If you need help or want to see the docs, comment with `/help`.<br><br>At the moment, preview environments do not get redeployed automatically. Simply rewrite `/preview` or contribute the feature.' \
         --pr-id $(inputs.params.prid)
