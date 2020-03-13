@@ -8,6 +8,7 @@ spec:
     - name: prid
     - name: reponame
     - name: prorg
+    - name: action
   resourcetemplates:
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
@@ -21,6 +22,8 @@ spec:
             value: $(params.prid)
           - name: reponame
             value: $(params.reponame)
+          - name: action
+            value: $(params.action)
           - name: prorg
             value: $(params.prorg)
 ---
@@ -34,6 +37,8 @@ spec:
       value: $(body.pull_request.number)
     - name: reponame
       value: $(body.repository.name)
+    - name: action
+      value: $(body.action)
     - name: prorg
       value: $(body.repository.owner.login)
 ---
