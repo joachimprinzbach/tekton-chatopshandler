@@ -33,6 +33,8 @@ spec:
       - name: reponame
       - name: prorg
       - name: action
+      - name: branch
+        default: master
       - name: gitopscli-version
         default: v2.1.0
   stepTemplate:
@@ -61,7 +63,7 @@ spec:
           --git-provider-url https://github.com/ \
           --organisation $(inputs.params.prorg) \
           --repository-name $(inputs.params.reponame) \
-          --branch deploy-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1) \
+          --branch $(inputs.params.branch) \
           --create-pr \
           --auto-merge
           echo "closed"
