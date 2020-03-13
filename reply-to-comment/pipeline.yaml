@@ -68,9 +68,8 @@ spec:
           --pr-id $(inputs.params.prid) \
           --create-pr \
           --auto-merge
-          echo "preview"
         elif [ $(inputs.params.comment) = "/undeploy" ]; then
-          gitopscli add-pr-comment \
+          gitopscli delete-preview \
           --username joachimprinzbach \
           --password $token \
           --git-provider github \
@@ -80,7 +79,6 @@ spec:
           --branch $(inputs.params.branch) \
           --create-pr \
           --auto-merge
-          echo "undeploy"
         elif [ $(inputs.params.comment) = "/help" ]; then
           gitopscli add-pr-comment \
           --username joachimprinzbach \
