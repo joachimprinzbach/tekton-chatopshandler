@@ -5,49 +5,27 @@ metadata:
   name: tekton-chatops-trigger-template
 spec:
   params:
-    - name: repourl
-      description: The git repository url
-    - name: prurl
-      description: The url to the PR
     - name: comment
-      description: The text of the comment
+    - name: prid
+    - name: reponame
+    - name: prorg
   resourcetemplates:
     - apiVersion: tekton.dev/v1alpha1
-      kind: TaskRun
+      kind: PipelineRun
       metadata:
-        generateName: tekton-chatops-run-
+        generateName: tekton-chatops-pipeline-run-
       spec:
-        taskRef:
-          name: tekton-chatops-task
-        inputs:
-          resources:
-            - name: repo
-              resourceSpec:
-                type: git
-                params:
-                  - name: url
-                    value: $(params.repourl)
-            - name: pr
-              resourceSpec:
-                type: pullRequest
-                params:
-                  - name: url
-                    value: $(params.prurl)
-          params:
-            - name: comment
-              value: $(params.comment)
-        outputs:
-          resources:
-            - name: pr
-              resourceSpec:
-                type: pullRequest
-                params:
-                  - name: url
-                    value: $(params.prurl)
-                secrets:
-                  - secretName: github-token
-                    secretKey: token
-                    fieldName: authToken
+        pipelineRef:
+          name: tekton-chatops-pipeline
+        params:
+          - name: comment
+            value: $(params.comment)
+          - name: prid
+            value: $(params.prid)
+          - name: reponame
+            value: $(params.reponame)
+          - name: prorg
+            value: $(params.prorg)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
@@ -55,12 +33,14 @@ metadata:
   name: tekton-chatops-trigger-binding
 spec:
   params:
-    - name: prurl
-      value: $(body.issue.html_url)
-    - name: repourl
-      value: $(body.repository.html_url)
+    - name: prid
+      value: $(body.issue.number)
     - name: comment
       value: $(body.comment.body)
+    - name: reponame
+      value: $(body.repository.name)
+    - name: prorg
+      value: $(body.repository.owner.login)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
@@ -108,6 +88,7 @@ rules:
       - tekton.dev
     resources:
       - taskruns
+      - pipelineruns
     verbs:
       - create
   - apiGroups:
