@@ -47,15 +47,50 @@ spec:
       image: baloiseincubator/gitopscli:$(inputs.params.gitopscli-version)
       script: |
         if [ $(inputs.params.comment) = "/test" ]; then
-          gitopscli add-pr-comment --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --text Erfolgreich --pr-id $(inputs.params.prid)
+          gitopscli add-pr-comment \
+          --username joachimprinzbach \
+          --password $token \
+          --git-provider github \
+          --git-provider-url https://github.com/ \
+          --organisation $(inputs.params.prorg) \
+          --repository-name $(inputs.params.reponame) \
+          --text="Helloooohoooo\\r\\nWorld" \
+          --pr-id $(inputs.params.prid)
         elif [ $(inputs.params.comment) = "/preview" ]; then
-          gitopscli create-preview --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --branch $(inputs.params.branch) --pr-id $(inputs.params.prid) --create-pr --auto-merge
+          gitopscli create-preview \
+          --username joachimprinzbach \
+          --password $token \
+          --git-provider github \
+          --git-provider-url https://github.com/ \
+          --organisation $(inputs.params.prorg) \
+          --repository-name $(inputs.params.reponame) \
+          --branch $(inputs.params.branch) \
+          --pr-id $(inputs.params.prid) \
+          --create-pr \
+          --auto-merge
           echo "preview"
         elif [ $(inputs.params.comment) = "/undeploy" ]; then
-          gitopscli add-pr-comment --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --branch $(inputs.params.branch) --create-pr --auto-merge
+          gitopscli add-pr-comment \
+          --username joachimprinzbach \
+          --password $token \
+          --git-provider github \
+          --git-provider-url https://github.com/ \
+          --organisation $(inputs.params.prorg) \
+          --repository-name $(inputs.params.reponame) \
+          --branch $(inputs.params.branch) \
+          --create-pr \
+          --auto-merge
           echo "undeploy"
         elif [ $(inputs.params.comment) = "/help" ]; then
-          gitopscli add-pr-comment --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --text='Need help? Find the docs, examples and a F.A.Q.: [Baloise Incubator: GitOps Cli](https://baloise-incubator.github.io/gitopscli/)' --pr-id $(inputs.params.prid)
+          gitopscli add-pr-comment \
+          --username joachimprinzbach \
+          --password $token \
+          --git-provider github \
+          --git-provider-url https://github.com/ \
+          --organisation $(inputs.params.prorg) \
+          --repository-name $(inputs.params.reponame) \
+          --text='Need help? Find the docs, examples and a F.A.Q.: [Baloise Incubator: GitOps Cli](https://baloise-incubator.github.io/gitopscli/)' \
+          --pr-id $(inputs.params.prid)
         else
           echo $(inputs.params.comment)
         fi

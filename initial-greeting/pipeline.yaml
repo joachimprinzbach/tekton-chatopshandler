@@ -39,4 +39,12 @@ spec:
     - name: run-command
       image: baloiseincubator/gitopscli:$(inputs.params.gitopscli-version)
       script: |
-        gitopscli add-pr-comment --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --text='Helloooohoooo' --pr-id $(inputs.params.prid)
+        gitopscli add-pr-comment \
+        --username joachimprinzbach \
+        --password $token \
+        --git-provider github \
+        --git-provider-url https://github.com/ \
+        --organisation $(inputs.params.prorg) \
+        --repository-name $(inputs.params.reponame) \
+        --text='Helloooohoooo\r\nWorld' \
+        --pr-id $(inputs.params.prid)
