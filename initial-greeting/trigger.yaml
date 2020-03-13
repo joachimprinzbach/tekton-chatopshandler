@@ -31,7 +31,7 @@ metadata:
 spec:
   params:
     - name: prid
-      value: $(pull_request.number)
+      value: $(body.pull_request.number)
     - name: reponame
       value: $(body.repository.name)
     - name: prorg
