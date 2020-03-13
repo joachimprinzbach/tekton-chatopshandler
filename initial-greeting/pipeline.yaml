@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: tekton-chatops-greeting-pipeline
+spec:
+  params:
+    - name: prid
+    - name: reponame
+    - name: prorg
+  tasks:
+    - name: perform-chatops-greeting-command
+      taskRef:
+        name: tekton-chatops-greeting-task
+      params:
+        - name: prid
+          value: $(params.prid)
+        - name: reponame
+          value: $(params.reponame)
+        - name: prorg
+          value: $(params.prorg)
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: tekton-chatops-greeting-task
+spec:
+  inputs:
+    params:
+      - name: prid
+      - name: reponame
+      - name: prorg
+      - name: gitopscli-version
+        default: v2.1.0
+  stepTemplate:
+    envFrom:
+      - secretRef:
+          name: github
+  steps:
+    - name: run-command
+      image: baloiseincubator/gitopscli:$(inputs.params.gitopscli-version)
+      script: |
+        gitopscli add-pr-comment --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --text='Helloooohoooo' --pr-id $(inputs.params.prid)
