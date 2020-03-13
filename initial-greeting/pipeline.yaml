@@ -47,7 +47,7 @@ spec:
       script: |
         if [ $(inputs.params.action) = "opened" ]; then
           gitopscli add-pr-comment \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
@@ -57,7 +57,7 @@ spec:
           --pr-id $(inputs.params.prid)
         elif [ $(inputs.params.action) = "closed" ]; then
           gitopscli delete-preview \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \

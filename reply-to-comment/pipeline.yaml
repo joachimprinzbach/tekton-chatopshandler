@@ -48,7 +48,7 @@ spec:
       script: |
         if [ $(inputs.params.comment) = "/test" ]; then
           gitopscli add-pr-comment \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
@@ -58,7 +58,7 @@ spec:
           --pr-id $(inputs.params.prid)
         elif [ $(inputs.params.comment) = "/preview" ]; then
           gitopscli create-preview \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
@@ -70,7 +70,7 @@ spec:
           --auto-merge
         elif [ $(inputs.params.comment) = "/undeploy" ]; then
           gitopscli delete-preview \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
@@ -81,7 +81,7 @@ spec:
           --auto-merge
         elif [ $(inputs.params.comment) = "/help" ]; then
           gitopscli add-pr-comment \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
