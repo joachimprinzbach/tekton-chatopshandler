@@ -55,7 +55,7 @@ spec:
           gitopscli add-pr-comment --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --branch $(inputs.params.branch) --create-pr --auto-merge
           echo "undeploy"
         elif [ $(inputs.params.comment) = "/help" ]; then
-          gitopscli add-pr-comment --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --text="No help for you - sry!" --pr-id $(inputs.params.prid)
+          gitopscli add-pr-comment --username joachimprinzbach --password $token --git-provider github --git-provider-url https://github.com/ --organisation $(inputs.params.prorg) --repository-name $(inputs.params.reponame) --text='Need help? Find the docs, examples and a F.A.Q.: [Baloise Incubator: GitOps Cli](https://baloise-incubator.github.io/gitopscli/)' --pr-id $(inputs.params.prid)
         else
           echo $(inputs.params.comment)
         fi
