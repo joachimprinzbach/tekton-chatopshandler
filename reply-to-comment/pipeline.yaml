@@ -8,7 +8,7 @@ spec:
     - name: prid
     - name: reponame
     - name: prorg
-    - name: branch
+    - name: apiurl
   tasks:
     - name: perform-chatops-command
       taskRef:
@@ -22,6 +22,8 @@ spec:
           value: $(params.reponame)
         - name: prorg
           value: $(params.prorg)
+        - name: apiurl
+          value: $(params.apiurl)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: Task
@@ -34,56 +36,86 @@ spec:
       - name: prid
       - name: reponame
       - name: prorg
+      - name: apiurl
       - name: gitopscli-version
         default: v2.1.0
-      - name: branch
-        default: master
   stepTemplate:
     envFrom:
       - secretRef:
           name: github
   steps:
-    - name: run-command
+    - name: get-branch-name-step
+      image: baloiseincubator/gitopscli:$(inputs.params.gitopscli-version)
+      env:
+        - name: PRID
+          value: "$(inputs.params.prid)"
+        - name: PRORG
+          value: "$(inputs.params.prorg)"
+        - name: REPONAME
+          value: "$(inputs.params.reponame)"
+      script: |
+        #!/usr/bin/env python3
+        import json
+        import http.client
+        import os
+        prid = os.environ['PRID']
+        prorg = os.environ['PRORG']
+        reponame = os.environ['REPONAME']
+        token = os.environ['token']
+        connection = http.client.HTTPSConnection("api.github.com")
+        headers={
+            "Content-type": "application/json",
+            "Authorization": "Bearer " + token,
+            "User-Agent": "TektonCD, the peaceful cat"
+        }
+        connection.request("GET", f"/repos/{prorg}/{reponame}/pulls/{prid}", "", headers)
+        response = connection.getresponse()
+        loaded_json = json.loads(response.read())
+        branchName = loaded_json["head"]["ref"]
+        print(branchName)
+        f = open("/workspace/branchfile.txt","w+")
+        f.write(branchName)
+    - name: perform-chat-ops-step
       image: baloiseincubator/gitopscli:$(inputs.params.gitopscli-version)
       script: |
+        branchName=$(cat /workspace/branchfile.txt)
+        echo $branchName
         if [ $(inputs.params.comment) = "/test" ]; then
           gitopscli add-pr-comment \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
           --organisation $(inputs.params.prorg) \
           --repository-name $(inputs.params.reponame) \
-          --text='You can <br>use the command `/ping`' \
+          --text='You can <br>use the command `/ping`!' \
           --pr-id $(inputs.params.prid)
         elif [ $(inputs.params.comment) = "/preview" ]; then
           gitopscli create-preview \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
           --organisation $(inputs.params.prorg) \
           --repository-name $(inputs.params.reponame) \
-          --branch $(inputs.params.branch) \
+          --branch "$branchName" \
           --pr-id $(inputs.params.prid) \
           --create-pr \
           --auto-merge
-          echo "preview"
         elif [ $(inputs.params.comment) = "/undeploy" ]; then
-          gitopscli add-pr-comment \
-          --username joachimprinzbach \
+          gitopscli delete-preview \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
           --organisation $(inputs.params.prorg) \
           --repository-name $(inputs.params.reponame) \
-          --branch $(inputs.params.branch) \
+          --branch $(branchName) \
           --create-pr \
           --auto-merge
-          echo "undeploy"
         elif [ $(inputs.params.comment) = "/help" ]; then
           gitopscli add-pr-comment \
-          --username joachimprinzbach \
+          --username incubator-tekton \
           --password $token \
           --git-provider github \
           --git-provider-url https://github.com/ \
@@ -91,6 +123,18 @@ spec:
           --repository-name $(inputs.params.reponame) \
           --text='Need help? Find the docs, examples and a F.A.Q.: [Baloise Incubator: GitOps Cli](https://baloise-incubator.github.io/gitopscli/)' \
           --pr-id $(inputs.params.prid)
+        elif [[ "$(inputs.params.comment)" == "/replicas"* ]]; then
+          COMMENT=$(inputs.params.comment)
+          replicaCount="${COMMENT//[!0-9]/}"
+          gitopscli deploy \
+          --username incubator-tekton \
+          --password $token \
+          --git-provider github \
+          --git-provider-url https://github.com/ \
+          --organisation $(inputs.params.prorg) \
+          --repository-name $(inputs.params.reponame) \
+          --file "gitops-nginx-demo-test/values.yaml" \
+          --values "{generic.replicaCount: ${replicaCount}}" \
         else
           echo $(inputs.params.comment)
         fi

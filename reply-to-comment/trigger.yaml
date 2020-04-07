@@ -9,6 +9,7 @@ spec:
     - name: prid
     - name: reponame
     - name: prorg
+    - name: apiurl
   resourcetemplates:
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
@@ -26,6 +27,8 @@ spec:
             value: $(params.reponame)
           - name: prorg
             value: $(params.prorg)
+          - name: apiurl
+            value: $(params.apiurl)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
@@ -41,6 +44,8 @@ spec:
       value: $(body.repository.name)
     - name: prorg
       value: $(body.repository.owner.login)
+    - name: apiurl
+      value: $(body.repository.url)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
